@@ -78,6 +78,7 @@ export default function App() {
   const outputRef = useRef(null)
   const lastCmdRef = useRef(null)
   const bottomRef = useRef(null)
+  const isMobile = useRef(typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0))
 
   const colors = themes[mode]
   const suggestions = getSuggestions(input)
@@ -108,7 +109,7 @@ export default function App() {
   }, [bootLines, booting])
 
   useEffect(() => {
-    if (!booting) inputRef.current?.focus()
+    if (!booting && !isMobile.current) inputRef.current?.focus()
   }, [booting])
 
   useEffect(() => {
@@ -177,14 +178,14 @@ export default function App() {
     setActiveCmd(cmd.toLowerCase())
     setCmdHistory((prev) => [cmd, ...prev])
     setHistoryIdx(-1); setInput(''); setSuggIdx(0)
-    inputRef.current?.focus()
+    if (!isMobile.current) inputRef.current?.focus()
   }
 
   return (
     <div
       className="flex flex-col h-screen scanlines"
       style={{ ...colors, background: 'var(--c-bg)', color: 'var(--c-text)' }}
-      onClick={() => inputRef.current?.focus()}
+      onClick={() => { if (!isMobile.current) inputRef.current?.focus() }}
     >
       {/* Top bar */}
       <div
@@ -307,7 +308,7 @@ export default function App() {
           {!booting && (
             <div
               style={{ borderTop: '1px solid var(--c-border)', background: 'var(--c-input)', position: 'relative' }}
-              onClick={(e) => { e.stopPropagation(); inputRef.current?.focus() }}
+              onClick={(e) => { e.stopPropagation(); if (!isMobile.current) inputRef.current?.focus() }}
             >
               {suggestions.length > 1 && (
                 <div
@@ -354,7 +355,6 @@ export default function App() {
                     onKeyDown={handleKey}
                     autoComplete="off"
                     spellCheck={false}
-                    autoFocus
                   />
                 </div>
               </div>
